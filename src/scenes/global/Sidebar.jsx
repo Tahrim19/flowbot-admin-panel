@@ -14,38 +14,83 @@ import {
   QuestionCircleOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import userImage from "../../assets/user.png";
 import { useTheme } from "../../theme"; // Use theme context to access the current theme
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 
 const { Sider } = Layout;
 
-const Sidebar = () => {
-  const [selectedKey, setSelectedKey] = useLocalStorage(
-    "selectedMenuItem",
-    1
-  );
-  const { theme } = useTheme(); // Access the current theme
+const Sidebar = ({ setIsAuthenticated }) => {
+  const [selectedKey, setSelectedKey] = useLocalStorage("selectedMenuItem", 1);
+  const { theme } = useTheme();
+  const navigate = useNavigate();
 
   const handleMenuClick = ({ key }) => {
     setSelectedKey(key);
+    if (selectedKey === "11") {
+      localStorage.clear();
+      console.log('logged out')
+      if (setIsAuthenticated) {
+        setIsAuthenticated(false);
+      }
+      navigate("/login");
+    }
   };
-
+  
   // Define the menu items array
   const menuItems = [
     { key: "1", icon: <DashboardOutlined />, label: "Dashboard", to: "/" },
-    { key: "2", icon: <MessageOutlined />, label: "Chat Sessions", to: "/chatSessions" },
+    {
+      key: "2",
+      icon: <MessageOutlined />,
+      label: "Chat Sessions",
+      to: "/chatSessions",
+    },
     { key: "3", icon: <TeamOutlined />, label: "Users", to: "/users" },
-    { key: "4", icon: <FileTextOutlined />, label: "Documents", to: "/documents" },
-    { key: "5", icon: <BarChartOutlined />, label: "Analytics", to: "/analytics" },
-    { key: "6", icon: <BulbOutlined />, label: "Sentiment Analysis", to: "/sentimentAnalysis" },
-    { key: "7", icon: <FundProjectionScreenOutlined />, label: "Platform Insights", to: "/platformInsights" },
-    { key: "8", icon: <SettingOutlined />, label: "Integrations", to: "/settings" },
+    {
+      key: "4",
+      icon: <FileTextOutlined />,
+      label: "Documents",
+      to: "/documents",
+    },
+    {
+      key: "5",
+      icon: <BarChartOutlined />,
+      label: "Analytics",
+      to: "/analytics",
+    },
+    {
+      key: "6",
+      icon: <BulbOutlined />,
+      label: "Sentiment Analysis",
+      to: "/sentimentAnalysis",
+    },
+    {
+      key: "7",
+      icon: <FundProjectionScreenOutlined />,
+      label: "Platform Insights",
+      to: "/platformInsights",
+    },
+    {
+      key: "8",
+      icon: <SettingOutlined />,
+      label: "Integrations",
+      to: "/settings",
+    },
     // { key: "9", icon: <NotificationOutlined />, label: "Alerts", to: "/alerts" },
     { key: "9", icon: <FileDoneOutlined />, label: "Reports", to: "/reports" },
-    { key: "10", icon: <QuestionCircleOutlined />, label: "Help & Support", to: "/help" },
-    { key: "11", icon: <LogoutOutlined />, label: "Logout", to: "/logout" },
+    {
+      key: "10",
+      icon: <QuestionCircleOutlined />,
+      label: "Help & Support",
+      to: "/help",
+    },
+    {
+      key: "11",
+      icon: <LogoutOutlined />,
+      label: "Logout",
+    },
   ];
 
   // Map over the menu items array to create menu items dynamically
@@ -68,7 +113,8 @@ const Sidebar = () => {
   }));
 
   return (
-    <Sider width={210}
+    <Sider
+      width={210}
       style={{
         height: "100%",
         position: "fixed",
