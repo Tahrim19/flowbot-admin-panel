@@ -1,9 +1,10 @@
 const baseUrl = 'http://192.168.1.14:3000/api/v1';
 const requests = {
     login: `${baseUrl}/login`,
+    users: `${baseUrl}/users`,
+    documents: `${baseUrl}/documents`,
 }
 export default requests;
-
 
 
   // // Logout function
