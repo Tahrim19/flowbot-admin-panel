@@ -1,116 +1,313 @@
-import React, { useState } from "react";
-import { Button, Table, Modal, Typography, Space } from "antd";
-import { mockDocuments } from "../../dummyData/data";
-import { useTheme } from "../../theme"; // Assuming you're using your custom theme
+import React, { useState, useEffect } from "react";
+import { Button, Table, Modal, Typography, Space, Upload, Input, Select, message } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
+import axios from "axios";
+import { useTheme } from "../../theme"; 
+import requests from "../../Requests";
 
 const Documents = () => {
-  const [documents, setDocuments] = useState(mockDocuments);
+  const [documents, setDocuments] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
+  const [file, setFile] = useState(null);
+  const [name, setName] = useState("doc.pdf");
+  const [language, setLanguage] = useState("en");
   const { theme } = useTheme();
   const { token } = theme;
 
-  // Functions to handle actions
+  // Fetch documents from API
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      setLoading(true);
+      try {
+        const authToken = localStorage.getItem("token");
+        if (!authToken) {
+          message.error("Unauthorized: No token found");
+          return;
+        }
+
+        const response = await axios.get(requests.documents, {
+          headers: { "x-access-token": authToken, "x-business-id": "null" },
+        });
+
+        setDocuments(response.data.data.rows.length > 0 ? response.data.data.rows : []);
+      } catch (error) {
+        message.error("Failed to fetch documents");
+        console.error("Error fetching documents:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDocuments();
+  }, []);
+
+  // Handle Upload Dialog
   const handleUpload = () => {
     setOpenDialog(true);
   };
 
-  const handleDelete = (id) => {
-    setDocuments(documents.filter((doc) => doc.id !== id));
-  };
-
   const handleDialogClose = () => {
     setOpenDialog(false);
+    setFile(null);
+    setName("");
+    setLanguage("");
   };
 
-  // Columns for Table
+  // Handle File Selection
+  const handleFileChange = ({ file }) => {
+    setFile(file);
+    setName(file.name);
+  };
+
+
+  // const handleSubmit = async () => {
+  //   if (!file || !name || !language) {
+  //     message.error("Please fill in all fields before submitting.");
+  //     return;
+  //   }
+  
+  //   setLoading(true);
+  
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append("file", file);
+  //     formData.append("language", language);
+  
+  //     const authToken = localStorage.getItem("token");
+  
+  //     // 1️⃣ Upload File and Get Response
+  //     const uploadResponse = await axios.post(requests.uploadDocument, formData, {
+  //       headers: {
+  //         "Content-Type": "multipart/form-data",
+  //         "x-access-token": authToken,
+  //         "x-business-id": "null",
+  //       },
+  //     });
+
+  //     console.log("file uploaded!")
+  //     // // 🔍 Log the entire response
+  //     // console.log("Upload Response:", uploadResponse.data);
+  //     // Ensure we are capturing the right data
+  //     const { id ,name, url, uid } = uploadResponse.data;
+  
+  //     // Validate data
+  //     if (!url || !uid) {
+  //       throw new Error("File upload failed. URL or UID is missing.");
+  //     }
+  
+  //     // 2️⃣ Prepare Document Data for the Second Request
+  //     const documentData = {
+  //       id,
+  //       document_name:name,        // Use the name from the response
+  //       document_path:url,         // Use the URL from the response
+  //       document_lang: language, // Include selected language'
+  //       document_type:file.type,
+  //     };
+  
+  //     console.log("Document Data to Save:", documentData);
+  
+  //     // 3️⃣ Submit Document Details
+  //     const saveResponse = await axios.post(requests.documents, documentData, {
+  //       headers: {
+  //         "x-access-token": authToken,
+  //         "x-business-id": "null",
+  //         "Content-Type":'applications/json',
+  //       },
+  //     });
+  
+  //     // Log the response of the save operation
+  //     console.log("Save Response:", saveResponse.data);
+  
+  //     if (!saveResponse.data.success) {
+  //       throw new Error("Failed to save document details.");
+  //     }
+  
+  //     // 4️⃣ Update the Table
+  //     setDocuments((prevDocs) => [...prevDocs, documentData]);
+  
+  //     message.success("Document uploaded successfully!");
+  //     handleDialogClose();
+  //   } catch (error) {
+  //     message.error("Failed to upload document.");
+  //     console.error("Error uploading document:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  
+
+  // Handle Delete Document
+  
+  const handleSubmit = async () => {
+    if (!file || !name || !language) {
+      message.error("Please fill in all fields before submitting.");
+      return;
+    }
+  
+    setLoading(true);
+  
+    try {
+      const formData = new FormData();
+      formData.append("file", file.originFileObj || file); 
+      formData.append("language", language);
+  
+      const authToken = localStorage.getItem("token");
+  
+      // 1️⃣ Upload File
+      console.log("Uploading file...");
+      const uploadResponse = await axios.post(requests.uploadDocument, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "x-access-token": authToken,
+          // "x-business-id": "null",
+          "x-business-id": "42df52ea-abe8-4a99-8f9c-10804c0e45bd",
+        },
+      });
+  
+      console.log("Upload Response:", uploadResponse.data);
+  
+      if (!uploadResponse.data || !uploadResponse.data.url || !uploadResponse.data.uid) {
+        throw new Error("File upload failed. URL or UID is missing.");
+      }
+  
+      // 2️⃣ Use the Input Field Values for Name & Language
+      const documentData = {
+        // id: uploadResponse.data.id, // ✅ Use ID from the response
+        document_name: name, // ✅ Use name from input field, not the API response
+        document_path: uploadResponse.data.url, 
+        document_lang: language, 
+        document_type: file.type,
+      };
+  
+      console.log("Saving document data:", documentData);
+  
+      // 3️⃣ Save Document Data
+      const saveResponse = await axios.post(requests.documents, documentData, {
+        headers: {
+          "x-access-token": authToken,
+          // "x-business-id": "null",
+          "x-business-id": "42df52ea-abe8-4a99-8f9c-10804c0e45bd",
+          "Content-Type": "application/json",
+        },
+      });
+  
+      console.log("Save Response:", saveResponse.data);
+  
+      if (!saveResponse.data.success) {
+        throw new Error("Failed to save document details.");
+      }
+  
+      // 4️⃣ Update the Table
+      setDocuments((prevDocs) => [...prevDocs, documentData]);
+  
+      message.success("Document uploaded successfully!");
+      handleDialogClose();
+    } catch (error) {
+      message.error(`Failed to upload document: ${error.message}`);
+      console.error("Error uploading document:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  
+  const handleDelete = async (id) => {
+    try {
+      const authToken = localStorage.getItem("token");
+      await axios.delete(`${requests.documents}/${id}`, {
+        headers: {
+          "x-access-token": authToken,
+          "x-business-id": "null",
+        },
+      });
+
+      setDocuments((prevDocs) => prevDocs.filter((doc) => doc.id !== id));
+      message.success("Document deleted successfully.");
+    } catch (error) {
+      message.error("Failed to delete document.");
+      console.error("Error deleting document:", error);
+    }
+  };
+
+  // Table Columns
   const queriedColumns = [
     { title: "Document ID", dataIndex: "id", key: "id" },
-    { title: "Name", dataIndex: "name", key: "name" },
-    { title: "Language", dataIndex: "language", key: "language" },
-    {
-      title: "Last Queried Date",
-      dataIndex: "lastQueried",
-      key: "lastQueried",
-    },
-    {
-      title: "Total Queries Matched",
-      dataIndex: "totalQueries",
-      key: "totalQueries",
-    },
+    { title: "Name", dataIndex: "document_name", key: "name" },
+    { title: "URL", dataIndex: "document_path", key: "url", render: (text) => <a href={text} target="_blank" rel="noopener noreferrer">{text}</a> },
+    { title: "Language", dataIndex: "document_lang", key: "language" },
     {
       title: "Actions",
       key: "actions",
       render: (record) => (
         <Space size="middle">
-          <Button danger onClick={() => handleDelete(record.id)}>
-            Delete
-          </Button>
+          <Button danger onClick={() => handleDelete(record.id)}>Delete</Button>
         </Space>
       ),
     },
   ];
 
   return (
-    <div
-      style={{
-        padding: "20px",
-        backgroundColor: token.colorBgBase,
-        color: token.colorTextBase,
-        marginLeft: "210px",
-      }}
-    >
-      <Typography.Title
-        level={2}
-        style={{
-          marginBottom: "1.5rem",
-          color: token.colorTextBase,
-          letterSpacing: "2px",
-        }}
-      >
+    <div style={{ padding: "20px", backgroundColor: token.colorBgBase, color: token.colorTextBase, marginLeft: "210px" }}>
+      <Typography.Title level={2} style={{ marginBottom: "1.5rem", color: token.colorTextBase, letterSpacing: "2px" }}>
         Documents
       </Typography.Title>
-      <Button
-        type="primary"
-        onClick={handleUpload}
-        style={{
-          marginBottom: "20px",
-        }}
-      >
-        Upload Document
+
+      {/* Upload Button */}
+      <Button type="primary" onClick={handleUpload} style={{ marginBottom: "20px" }}>
+        Add Document
       </Button>
 
-      {/* Queried Documents Section */}
+      {/* Queried Documents Table */}
       <Typography.Title level={5}>Queried Documents</Typography.Title>
       {documents.length > 0 ? (
-        <div style={{ marginBottom: "40px", width: "100%" }}>
-          <Table
-            columns={queriedColumns}
-            dataSource={documents}
-            rowKey="id"
-            pagination={{ pageSize: 5 }}
-          />
-        </div>
+        <Table
+          columns={queriedColumns}
+          dataSource={documents}
+          rowKey="id"
+          loading={loading}
+          pagination={{ pageSize: 5 }}
+        />
       ) : (
-        <Typography.Text type="secondary">
-          No queried documents available.
-        </Typography.Text>
+        <Typography.Text type="secondary">No queried documents available.</Typography.Text>
       )}
 
-      {/* Upload Dialog */}
+      {/* Upload Modal */}
       <Modal
         title="Upload Document"
         open={openDialog}
         onCancel={handleDialogClose}
         footer={[
-          <Button key="back" onClick={handleDialogClose}>
-            Cancel
-          </Button>,
-          <Button key="submit" type="primary">
-            Upload
-          </Button>,
+          <Button key="cancel" onClick={handleDialogClose}>Cancel</Button>,
+          <Button key="upload" type="primary" onClick={handleSubmit} loading={loading}>Submit</Button>,
         ]}
       >
-        <Typography.Text>Document upload form goes here.</Typography.Text>
+        {/* Name Input */}
+        <Typography.Text>Document Name:</Typography.Text>
+        <Input 
+          value={name} 
+          onChange={(e) => setName(e.target.value)} 
+          placeholder="Enter document name" 
+          style={{ marginBottom: "10px" }} 
+        />
+
+        {/* Language Selection */}
+        <Typography.Text>Select Language:</Typography.Text>
+        <Select 
+          value={language} 
+          onChange={(value) => setLanguage(value)} 
+          placeholder="Choose a language" 
+          style={{ width: "100%", marginBottom: "10px" }}
+        >
+          <Select.Option value="en">English</Select.Option>
+          <Select.Option value="ar">Arabic</Select.Option>
+       \
+        </Select>
+
+        <Upload beforeUpload={() => false} onChange={handleFileChange} maxCount={1}>
+          <Button icon={<UploadOutlined />}>Select File</Button>
+        </Upload>
+        {file && <Typography.Text>Selected File: {file.name}</Typography.Text>}
       </Modal>
     </div>
   );

@@ -3,9 +3,12 @@ const requests = {
     login: `${baseUrl}/login`,
     users: `${baseUrl}/users`,
     documents: `${baseUrl}/documents`,
+    uploadDocument : `${baseUrl}/uploads`,
+    chatSessions: `${baseUrl}/conversations`,
 }
 export default requests;
 
+//  "42df52ea-abe8-4a99-8f9c-10804c0e45bd"
 
   // // Logout function
   // const handleLogout = () => {
