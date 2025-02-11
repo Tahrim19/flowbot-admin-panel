@@ -36,7 +36,7 @@ const Topbar = () => {
               color: theme.token.colorPrimary,
             }}
           >
-            FLOWBOT LOGO
+            ARABI
           </Typography.Title>
         </div>
       </Header>
