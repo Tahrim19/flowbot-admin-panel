@@ -36,8 +36,6 @@ const ChatSessions = () => {
           headers: { "x-access-token": authToken, "x-business-id": bId },
         });
 
-        console.log("API Response:", response.data); // Debugging
-
         const rows = response.data?.rows || [];
 
         setSessions(rows);
