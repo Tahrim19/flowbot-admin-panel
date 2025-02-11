@@ -20,18 +20,19 @@ const Documents = () => {
   const [loading, setLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [file, setFile] = useState(null);
-  const [name, setName] = useState("doc.pdf");
-  const [language, setLanguage] = useState("en");
+  const [name, setName] = useState("");
+  const [language, setLanguage] = useState("");
   const { theme } = useTheme();
   const { token } = theme;
+
+  const authToken = localStorage.getItem("token");
+  const bId = localStorage.getItem("businessId");
 
   // Fetch documents from API
   useEffect(() => {
     const fetchDocuments = async () => {
       setLoading(true);
       try {
-        const authToken = localStorage.getItem("token");
-        const bId = localStorage.getItem("businessId");
         if (!authToken) {
           message.error("Unauthorized: No token found");
           return;
@@ -57,13 +58,14 @@ const Documents = () => {
     };
 
     fetchDocuments();
-  }, []);
+  }, [authToken,bId]);
 
   // Handle Upload Dialog
   const handleUpload = () => {
     setOpenDialog(true);
   };
 
+  // handle the close of the dialog
   const handleDialogClose = () => {
     setOpenDialog(false);
     setFile(null);
@@ -77,83 +79,7 @@ const Documents = () => {
     setName(file.name);
   };
 
-  // const handleSubmit = async () => {
-  //   if (!file || !name || !language) {
-  //     message.error("Please fill in all fields before submitting.");
-  //     return;
-  //   }
-
-  //   setLoading(true);
-
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append("file", file);
-  //     formData.append("language", language);
-
-  //     const authToken = localStorage.getItem("token");
-
-  //     // 1️⃣ Upload File and Get Response
-  //     const uploadResponse = await axios.post(requests.uploadDocument, formData, {
-  //       headers: {
-  //         "Content-Type": "multipart/form-data",
-  //         "x-access-token": authToken,
-  //         "x-business-id": "null",
-  //       },
-  //     });
-
-  //     console.log("file uploaded!")
-  //     // // 🔍 Log the entire response
-  //     // console.log("Upload Response:", uploadResponse.data);
-  //     // Ensure we are capturing the right data
-  //     const { id ,name, url, uid } = uploadResponse.data;
-
-  //     // Validate data
-  //     if (!url || !uid) {
-  //       throw new Error("File upload failed. URL or UID is missing.");
-  //     }
-
-  //     // 2️⃣ Prepare Document Data for the Second Request
-  //     const documentData = {
-  //       id,
-  //       document_name:name,        // Use the name from the response
-  //       document_path:url,         // Use the URL from the response
-  //       document_lang: language, // Include selected language'
-  //       document_type:file.type,
-  //     };
-
-  //     console.log("Document Data to Save:", documentData);
-
-  //     // 3️⃣ Submit Document Details
-  //     const saveResponse = await axios.post(requests.documents, documentData, {
-  //       headers: {
-  //         "x-access-token": authToken,
-  //         "x-business-id": "null",
-  //         "Content-Type":'applications/json',
-  //       },
-  //     });
-
-  //     // Log the response of the save operation
-  //     console.log("Save Response:", saveResponse.data);
-
-  //     if (!saveResponse.data.success) {
-  //       throw new Error("Failed to save document details.");
-  //     }
-
-  //     // 4️⃣ Update the Table
-  //     setDocuments((prevDocs) => [...prevDocs, documentData]);
-
-  //     message.success("Document uploaded successfully!");
-  //     handleDialogClose();
-  //   } catch (error) {
-  //     message.error("Failed to upload document.");
-  //     console.error("Error uploading document:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // Handle Delete Document
-
+  // handle submit of document
   const handleSubmit = async () => {
     if (!file || !name || !language) {
       message.error("Please fill in all fields before submitting.");
@@ -167,9 +93,7 @@ const Documents = () => {
       formData.append("file", file.originFileObj || file);
       formData.append("language", language);
 
-      const authToken = localStorage.getItem("token");
-
-      // 1️⃣ Upload File
+      // Upload File
       console.log("Uploading file...");
       const uploadResponse = await axios.post(
         requests.uploadDocument,
@@ -178,8 +102,7 @@ const Documents = () => {
           headers: {
             "Content-Type": "multipart/form-data",
             "x-access-token": authToken,
-            // "x-business-id": "null",
-            "x-business-id": "42df52ea-abe8-4a99-8f9c-10804c0e45bd",
+            "x-business-id": bId,
           },
         }
       );
@@ -194,10 +117,10 @@ const Documents = () => {
         throw new Error("File upload failed. URL or UID is missing.");
       }
 
-      // 2️⃣ Use the Input Field Values for Name & Language
+      // Use the Input Field Values for Name & Language
       const documentData = {
-        // id: uploadResponse.data.id, // ✅ Use ID from the response
-        document_name: name, // ✅ Use name from input field, not the API response
+        // id: uploadResponse.data.id, // Use ID from the response
+        document_name: name, 
         document_path: uploadResponse.data.url,
         document_lang: language,
         document_type: file.type,
@@ -205,12 +128,11 @@ const Documents = () => {
 
       console.log("Saving document data:", documentData);
 
-      // 3️⃣ Save Document Data
+      // Save Document Data
       const saveResponse = await axios.post(requests.documents, documentData, {
         headers: {
           "x-access-token": authToken,
-          // "x-business-id": "null",
-          "x-business-id": "42df52ea-abe8-4a99-8f9c-10804c0e45bd",
+          "x-business-id": bId,
           "Content-Type": "application/json",
         },
       });
@@ -221,7 +143,7 @@ const Documents = () => {
         throw new Error("Failed to save document details.");
       }
 
-      // 4️⃣ Update the Table
+      // Update the Table
       setDocuments((prevDocs) => [...prevDocs, documentData]);
 
       message.success("Document uploaded successfully!");
@@ -234,13 +156,13 @@ const Documents = () => {
     }
   };
 
+  // Handle Delete Document
   const handleDelete = async (id) => {
     try {
-      const authToken = localStorage.getItem("token");
       await axios.delete(`${requests.documents}/${id}`, {
         headers: {
           "x-access-token": authToken,
-          "x-business-id": "null",
+          "x-business-id": bId,
         },
       });
 
