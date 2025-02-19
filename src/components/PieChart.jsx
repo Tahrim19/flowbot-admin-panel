@@ -1,6 +1,6 @@
 import { ResponsivePie } from "@nivo/pie";
-import { mockPieData as data} from "../dummyData/data";    
-const PieChart = () => {
+// import { mockPieData as data} from "../dummyData/data";    
+const PieChart = ({data}) => {
     // const chartColors = ["#1554ad","#1668dc","#3c89e8"];
     const chartColors = ["#3c9ae8","#65b7f3","#8dcff8"];
 

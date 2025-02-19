@@ -5,10 +5,13 @@ const requests = {
     documents: `${baseUrl}/documents`,
     uploadDocument : `${baseUrl}/uploads`,
     chatSessions: `${baseUrl}/conversations`,
+
+    // ANALYTICS
+    chatUsage:`${baseUrl}/charts/chat-by-platform`,
+    peakUsage:`${baseUrl}/charts/peak-usage-alert`,
 }
 export default requests;
 
-//  "42df52ea-abe8-4a99-8f9c-10804c0e45bd"
 
   // // Logout function
   // const handleLogout = () => {
