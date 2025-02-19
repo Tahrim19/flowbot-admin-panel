@@ -1,6 +1,6 @@
 import { ResponsiveLine } from "@nivo/line";
-import { mockLineData as data} from "../dummyData/data";    
-const AreaChart = () => {
+// import { mockLineData as data} from "../dummyData/data";    
+const AreaChart = ({data}) => {
     // const chartColors = ["#1554ad","#1668dc","#3c89e8"];
     const chartColors = ["#3c9ae8","#65b7f3","#8dcff8"];
 
