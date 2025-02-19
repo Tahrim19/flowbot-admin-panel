@@ -31,7 +31,7 @@ const Users = () => {
         const response = await axios.get(requests.users, {
           headers: { "x-access-token": authToken, "x-business-id": bId }, // Send token and businessId in headers
         });
-        console.log(response.data);
+        // console.log(response.data);
         if (response.data.data.rows.length === 0) {
           setUsers([]);
         } else {

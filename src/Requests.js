@@ -11,6 +11,9 @@ const requests = {
     peakUsage:`${baseUrl}/charts/peak-usage-alert`,
     sentimentTrends:`${baseUrl}/charts/sentiment-trends`,
     sentimentDistribution:`${baseUrl}/charts/sentiment-by-query`,
+    keywords:`${baseUrl}/charts/top-keywords`,
+    fallbackRate:`${baseUrl}/charts/fallback-rate`,
+    queryAccuracy:`${baseUrl}/charts/query-accuracy`,
 }
 export default requests;
 

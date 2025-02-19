@@ -1,7 +1,7 @@
 import { ResponsiveLine } from "@nivo/line";
-import { mockLineData as data } from "../dummyData/data";
+// import { mockLineData as data } from "../dummyData/data";
 
-const LineChart = () => {
+const LineChart = ({data,legendX,legendY}) => {
   // const chartColors = ["#1554ad","#1668dc","#3c89e8"];
   const chartColors = ["#3c9ae8", "#65b7f3", "#8dcff8"];
 
@@ -13,8 +13,8 @@ const LineChart = () => {
         xScale={{ type: "point" }}
         yScale={{
           type: "linear",
-          min: "auto",
-          max: "auto",
+          min: "0",
+          max: "1",
           stacked: true,
           reverse: false,
         }}
@@ -26,7 +26,7 @@ const LineChart = () => {
           tickSize: 5,
           tickPadding: 5,
           tickRotation: 0,
-          legend: "Days",
+          legend: legendX,
           legendOffset: 36,
           legendPosition: "middle",
           truncateTickAt: 0,
@@ -35,7 +35,7 @@ const LineChart = () => {
           tickSize: 5,
           tickPadding: 5,
           tickRotation: 0,
-          legend: "Count",
+          legend: legendY,
           legendOffset: -40,
           legendPosition: "middle",
           truncateTickAt: 0,
@@ -50,10 +50,10 @@ const LineChart = () => {
         useMesh={true}
         legends={[
           {
-            anchor: "bottom-right",
+            anchor: "right",
             direction: "column",
             justify: false,
-            translateX: 100,
+            translateX: 78,
             translateY: 0,
             itemsSpacing: 8,
             itemDirection: "left-to-right",
