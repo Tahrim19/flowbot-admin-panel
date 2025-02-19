@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Typography, Select, Card, Row, Col, message, Spin } from "antd";
+import { Typography, Card, Row, Col, message, Spin } from "antd";
 import LineChart from "../../components/LineChart";
 import { useTheme } from "../../theme";
 import axios from "axios";
 import requests from "../../Requests";
-const { Option } = Select;
+// const { Option } = Select;
 
 const Analytics = () => {
   const { theme } = useTheme();
@@ -137,6 +137,8 @@ const Analytics = () => {
                 data={queryAccuracy}
                 legendX="Day"
                 legendY="Accuracy (%)"
+                minX="0"
+                minY="1"
               />
             </Card>
           </Col>

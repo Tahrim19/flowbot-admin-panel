@@ -14,6 +14,15 @@ const requests = {
     keywords:`${baseUrl}/charts/top-keywords`,
     fallbackRate:`${baseUrl}/charts/fallback-rate`,
     queryAccuracy:`${baseUrl}/charts/query-accuracy`,
+    messageTrends:`${baseUrl}/charts/message-trends`,
+    sentimentSummary:`${baseUrl}/charts/sentiment-summary`,
+    activeHours:`${baseUrl}/charts/active-hours`,
+    uniqueUsers:`${baseUrl}/charts/unique-users`,
+    totalChats:`${baseUrl}/charts/total-chats`,
+    totalChatsDaily:`${baseUrl}/charts/total-chats-daily`,
+    totalChatsWeekly:`${baseUrl}/charts/total-chats-weekly`,
+    totalChatsMonthly:`${baseUrl}/charts/total-chats-monthly`,
+
 }
 export default requests;
 
@@ -25,3 +34,6 @@ export default requests;
   //   navigate("/login");
   //   message.success("Logged out successfully");
   // };
+
+
+  

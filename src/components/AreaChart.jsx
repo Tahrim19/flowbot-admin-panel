@@ -1,6 +1,6 @@
 import { ResponsiveLine } from "@nivo/line";
 // import { mockLineData as data} from "../dummyData/data";    
-const AreaChart = ({data}) => {
+const AreaChart = ({data , legendX , legendY,minX,maxY}) => {
     // const chartColors = ["#1554ad","#1668dc","#3c89e8"];
     const chartColors = ["#3c9ae8","#65b7f3","#8dcff8"];
 
@@ -13,8 +13,10 @@ const AreaChart = ({data}) => {
         xFormat=" >-"
         yScale={{
             type: 'linear',
-            min: '15',
-            max: '65',
+            // min: '15',
+            // max: '65',
+            min:minX,
+            max:maxY,
             stacked: false,
             reverse: true
         }}
@@ -26,7 +28,7 @@ const AreaChart = ({data}) => {
             tickSize: 5,
             tickPadding: 5,
             tickRotation: 0,
-            legend: 'Days',
+            legend: legendX,
             legendOffset: 36,
             legendPosition: 'middle',
             truncateTickAt: 0
@@ -35,7 +37,7 @@ const AreaChart = ({data}) => {
             tickSize: 5,
             tickPadding: 5,
             tickRotation: 0,
-            legend: 'Count',
+            legend: legendY,
             legendOffset: -40,
             legendPosition: 'middle',
             truncateTickAt: 0
@@ -43,7 +45,7 @@ const AreaChart = ({data}) => {
         enableGridX={true}
         enableGridY={true}
         lineWidth={2}
-        enablePoints={false}
+        enablePoints={true}
         // pointColor={{ theme: 'background' }}
         pointBorderWidth={2}
         pointBorderColor={{ from: 'serieColor' }}

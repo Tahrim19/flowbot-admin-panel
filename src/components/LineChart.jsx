@@ -1,7 +1,7 @@
 import { ResponsiveLine } from "@nivo/line";
 // import { mockLineData as data } from "../dummyData/data";
 
-const LineChart = ({data,legendX,legendY}) => {
+const LineChart = ({data,legendX,legendY , minX , minY}) => {
   // const chartColors = ["#1554ad","#1668dc","#3c89e8"];
   const chartColors = ["#3c9ae8", "#65b7f3", "#8dcff8"];
 
@@ -13,8 +13,8 @@ const LineChart = ({data,legendX,legendY}) => {
         xScale={{ type: "point" }}
         yScale={{
           type: "linear",
-          min: "0",
-          max: "1",
+          min: minX,
+          max: minY,
           stacked: true,
           reverse: false,
         }}

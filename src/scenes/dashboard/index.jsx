@@ -1,19 +1,116 @@
-import React from "react";
-import { Row, Col, Card, Typography } from "antd";
+import React, { useEffect, useState } from "react";
+import { Row, Col, Card, Typography, message } from "antd";
 import AreaChart from "../../components/AreaChart";
 import LineChart from "../../components/LineChart";
 import PieChart from "../../components/PieChart";
 import { useTheme } from "../../theme";
+import requests from "../../Requests";
+import axios from "axios";
 
 const Dashboard = () => {
-  // Mock data for overview metrics
-  const totalChats = 12000;
-  const uniqueUsers = 4500;
-  const activeHours = "9 AM - 6 PM";
-  const costSavingsEstimate = "$25,000";
+  const newUsers = "25";
 
   const { theme } = useTheme();
   const { token } = theme;
+
+  const [loading, setLoading] = useState(false);
+  const [totalChats, setTotalChats] = useState(0);
+  const [uniqueUsers, setUniqueUsers] = useState(0);
+  const [activeHours, setActiveHours] = useState(0);
+  const [messageTrends, setMessageTrends] = useState([]);
+  const [sentimentData, setSentimentData] = useState([]);
+  const [totalChatsDaily, setTotalChatsDaily] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const authToken = localStorage.getItem("token");
+        const bId = localStorage.getItem("businessId");
+
+        if (!authToken || !bId) {
+          message.error("Unauthorized: Missing credentials");
+          return;
+        }
+
+        const headers = {
+          headers: {
+            "x-access-token": authToken,
+            "x-business-id": bId,
+          },
+        };
+
+        // fetch data simultaneously
+        const [
+          totalChatsDailyResponse,
+          totalChatsResponse,
+          uniqueUsersResponse,
+          activeHoursResponse,
+          messageTrendsResponse,
+          sentimentResponse,
+        ] = await Promise.all([
+          axios.get(requests["totalChatsDaily"], headers),
+          axios.get(requests["totalChats"], headers),
+          axios.get(requests["uniqueUsers"], headers),
+          axios.get(requests["activeHours"], headers),
+          axios.get(requests["messageTrends"], headers),
+          axios.get(requests["sentimentSummary"], headers),
+        ]);
+
+        const formattedData = [
+          {
+            id: "message trends",
+            color: "hsl(205, 70%, 50%)",
+            data: messageTrendsResponse.data.map((item) => ({
+              x: new Date(item.day).toLocaleDateString("en-US", {
+                weekday: "short",
+              }), // Convert to "Mon", "Tue"
+
+              y: parseFloat(item.message_count), // Ensure it's a number
+            })),
+          },
+        ];
+
+        const formattedChats = [
+          {
+            id: "message trends",
+            color: "hsl(205, 70%, 50%)",
+            data: totalChatsDailyResponse.data.map((item) => ({
+              x: new Date(item.day).toLocaleDateString("en-US", {
+                weekday: "short",
+              }), // Convert to "Mon", "Tue"
+
+              y: parseFloat(item.total_chats), // Ensure it's a number
+            })),
+          },
+        ];
+
+        setTotalChatsDaily(formattedChats);
+
+        setTotalChats(totalChatsResponse.data.map((item) => item.total_chats));
+        setUniqueUsers(
+          uniqueUsersResponse.data.map((item) => item.unique_users)
+        );
+        setActiveHours(
+          activeHoursResponse.data.map((item) => item.active_hours)
+        );
+        setMessageTrends(formattedData);
+        setSentimentData(
+          sentimentResponse.data.map((item) => ({
+            id: item.count,
+            label: item.sentiment ? item.sentiment : "Unknown",
+            value: item.count,
+          }))
+        );
+      } catch (error) {
+        message.error("Failed to fetch data");
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
     <div
@@ -42,7 +139,7 @@ const Dashboard = () => {
           <Card
             title={
               <Typography.Text strong style={{ paddingBottom: "-50px" }}>
-                Total Chats (Daily/Weekly/Monthly)
+                Total Chats (Daily)
               </Typography.Text>
             }
             style={{
@@ -52,7 +149,13 @@ const Dashboard = () => {
             }}
           >
             <div style={{ marginTop: "-50px" }}>
-              <AreaChart />
+              <AreaChart
+                data={totalChatsDaily}
+                legendX="Day"
+                legendY="Count"
+                minX="100"
+                maxY="0"
+              />
             </div>
           </Card>
         </Col>
@@ -114,7 +217,7 @@ const Dashboard = () => {
               </Card>
             </Col>
 
-            {/* Cost Savings */}
+            {/* New Users */}
             <Col xs={24}>
               <Card
                 bordered={false}
@@ -125,9 +228,9 @@ const Dashboard = () => {
                   height: "100px", // Fixed height for a smaller card
                 }}
               >
-                <Typography.Title level={5}>Cost Savings</Typography.Title>
+                <Typography.Title level={5}>New Users</Typography.Title>
                 <Typography level={3} style={{ color: token.colorPrimary }}>
-                  {costSavingsEstimate}
+                  {newUsers}
                 </Typography>
               </Card>
             </Col>
@@ -147,11 +250,9 @@ const Dashboard = () => {
               backgroundColor: token.colorBgContainer,
             }}
           >
-            <div style={{marginTop:'-28px'}}>
-
-            <PieChart />
+            <div style={{ marginTop: "-28px" }}>
+              <PieChart data={sentimentData} />
             </div>
-
           </Card>
         </Col>
 
@@ -165,7 +266,13 @@ const Dashboard = () => {
               backgroundColor: token.colorBgContainer,
             }}
           >
-            <LineChart />
+            <LineChart
+              data={messageTrends}
+              legendX="Days"
+              legendY="Count"
+              minX="1"
+              minY="100"
+            />
           </Card>
         </Col>
       </Row>
