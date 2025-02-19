@@ -9,6 +9,8 @@ const requests = {
     // ANALYTICS
     chatUsage:`${baseUrl}/charts/chat-by-platform`,
     peakUsage:`${baseUrl}/charts/peak-usage-alert`,
+    sentimentTrends:`${baseUrl}/charts/sentiment-trends`,
+    sentimentDistribution:`${baseUrl}/charts/sentiment-by-query`,
 }
 export default requests;
 
