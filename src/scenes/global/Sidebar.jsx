@@ -14,30 +14,34 @@ import {
   QuestionCircleOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import userImage from "../../assets/user.png";
 import { useTheme } from "../../theme"; // Use theme context to access the current theme
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 
 const { Sider } = Layout;
 
-const Sidebar = ({ setIsAuthenticated }) => {
+const Sidebar = () => {
   const [selectedKey, setSelectedKey] = useLocalStorage("selectedMenuItem", 1);
   const { theme } = useTheme();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
+
+  // const handleMenuClick = ({ key }) => {
+  //   setSelectedKey(key);
+  //   if (selectedKey === "11") {
+  //     localStorage.clear();
+  //     console.log('logged out')
+  //     if (setIsAuthenticated) {
+  //       setIsAuthenticated(false);
+  //     }
+  //     navigate("/login");
+  //   }
+  // };
 
   const handleMenuClick = ({ key }) => {
     setSelectedKey(key);
-    if (selectedKey === "11") {
-      localStorage.clear();
-      console.log('logged out')
-      if (setIsAuthenticated) {
-        setIsAuthenticated(false);
-      }
-      navigate("/login");
-    }
   };
-  
+
   // Define the menu items array
   const menuItems = [
     { key: "1", icon: <DashboardOutlined />, label: "Dashboard", to: "/" },
@@ -90,6 +94,7 @@ const Sidebar = ({ setIsAuthenticated }) => {
       key: "11",
       icon: <LogoutOutlined />,
       label: "Logout",
+      to: "/logout"
     },
   ];
 

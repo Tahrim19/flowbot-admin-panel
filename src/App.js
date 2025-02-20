@@ -16,7 +16,7 @@ import Reports from "./scenes/reports";
 import HelpSupport from "./scenes/help";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import Login from "./scenes/login";
-// import Logout from "./scenes/logout";
+import Logout from "./scenes/logout";
 
 
 export default function App() {
@@ -42,7 +42,7 @@ export default function App() {
               {/* <Route path="/alerts" element={<Alerts />} /> */}
               <Route path="/reports" element={<Reports />} />
               <Route path="/help" element={<HelpSupport />} />
-              {/* <Route path="/logout" element={<Logout setIsAuthenticated={setIsAuthenticated} />} /> */}
+              <Route path="/logout" element={<Logout setIsAuthenticated={setIsAuthenticated} />} />
             </Routes>
           </main>
         </div>

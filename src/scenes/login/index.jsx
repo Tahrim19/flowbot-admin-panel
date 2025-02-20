@@ -38,22 +38,15 @@ const LoginPage = ({ setIsAuthenticated }) => {
       );
 
       if (response.status === 200) {
-        console.log("Login successful", response.data); // Make sure this contains the token
+        navigate("/"); // Redirect to home page
+        // console.log("Login successful", response.data);
         // console.log(response.data.data.token);
 
         // Save the token in localStorage
         localStorage.setItem("token", response.data.data.token);
         localStorage.setItem("businessId", response.data.data.business_id);
-        // console.log("token saved");
-
-        // // Check if token is set in localStorage
-        // const token = localStorage.getItem("token");
-        // const business_id = localStorage.getItem("businessId");
-        // console.log(token); // This should print the token now if set correctly
-        // console.log(business_id);
 
         setIsAuthenticated(true);
-        navigate("/"); // Redirect to home page
       }
     } catch (error) {
       if (error.response) {
