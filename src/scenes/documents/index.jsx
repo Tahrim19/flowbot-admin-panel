@@ -9,8 +9,9 @@ import {
   Input,
   Select,
   message,
+  Spin,
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { ExclamationCircleOutlined, UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { useTheme } from "../../theme";
 import requests from "../../Requests";
@@ -22,6 +23,9 @@ const Documents = () => {
   const [file, setFile] = useState(null);
   const [name, setName] = useState("");
   const [language, setLanguage] = useState("");
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [selectedDocId, setSelectedDocId] = useState(null);
+
   const { theme } = useTheme();
   const { token } = theme;
 
@@ -33,12 +37,8 @@ const Documents = () => {
     const fetchDocuments = async () => {
       setLoading(true);
       try {
-        if (!authToken) {
-          message.error("Unauthorized: No token found");
-          return;
-        }
-        if (!bId) {
-          message.error("Unauthorized: No businessId found");
+        if (!authToken || !bId) {
+          message.error("Unauthorized: Missing token or businessId");
           return;
         }
 
@@ -46,9 +46,7 @@ const Documents = () => {
           headers: { "x-access-token": authToken, "x-business-id": bId },
         });
 
-        setDocuments(
-          response.data.data.rows.length > 0 ? response.data.data.rows : []
-        );
+        setDocuments(response.data.data.rows || []);
       } catch (error) {
         message.error("Failed to fetch documents");
         console.error("Error fetching documents:", error);
@@ -58,14 +56,12 @@ const Documents = () => {
     };
 
     fetchDocuments();
-  }, [authToken,bId]);
+  }, [authToken, bId]);
 
-  // Handle Upload Dialog
-  const handleUpload = () => {
-    setOpenDialog(true);
-  };
+  // Open Upload Dialog
+  const handleUpload = () => setOpenDialog(true);
 
-  // handle the close of the dialog
+  // Close Upload Dialog
   const handleDialogClose = () => {
     setOpenDialog(false);
     setFile(null);
@@ -79,7 +75,7 @@ const Documents = () => {
     setName(file.name);
   };
 
-  // handle submit of document
+  // Handle Document Upload
   const handleSubmit = async () => {
     if (!file || !name || !language) {
       message.error("Please fill in all fields before submitting.");
@@ -107,28 +103,18 @@ const Documents = () => {
         }
       );
 
-      console.log("Upload Response:", uploadResponse.data);
-
-      if (
-        !uploadResponse.data ||
-        !uploadResponse.data.url ||
-        !uploadResponse.data.uid
-      ) {
+      if (!uploadResponse.data?.url || !uploadResponse.data?.uid) {
         throw new Error("File upload failed. URL or UID is missing.");
       }
 
-      // Use the Input Field Values for Name & Language
+      // Save Document Data
       const documentData = {
-        // id: uploadResponse.data.id, // Use ID from the response
-        document_name: name, 
+        document_name: name,
         document_path: uploadResponse.data.url,
         document_lang: language,
         document_type: file.type,
       };
 
-      console.log("Saving document data:", documentData);
-
-      // Save Document Data
       const saveResponse = await axios.post(requests.documents, documentData, {
         headers: {
           "x-access-token": authToken,
@@ -136,8 +122,6 @@ const Documents = () => {
           "Content-Type": "application/json",
         },
       });
-
-      console.log("Save Response:", saveResponse.data);
 
       if (!saveResponse.data.success) {
         throw new Error("Failed to save document details.");
@@ -156,18 +140,29 @@ const Documents = () => {
     }
   };
 
-  // Handle Delete Document
-  const handleDelete = async (id) => {
+  // Open Delete Confirmation Modal
+  const showDeleteModal = (id) => {
+    setSelectedDocId(id);
+    setDeleteModalVisible(true);
+  };
+
+  // Handle Document Deletion
+  const handleDelete = async () => {
+    if (!selectedDocId) return;
+
     try {
-      await axios.delete(`${requests.documents}/${id}`, {
+      await axios.delete(`${requests.documents}/${selectedDocId}`, {
         headers: {
           "x-access-token": authToken,
           "x-business-id": bId,
         },
       });
 
-      setDocuments((prevDocs) => prevDocs.filter((doc) => doc.id !== id));
+      setDocuments((prevDocs) =>
+        prevDocs.filter((doc) => doc.id !== selectedDocId)
+      );
       message.success("Document deleted successfully.");
+      setDeleteModalVisible(false);
     } catch (error) {
       message.error("Failed to delete document.");
       console.error("Error deleting document:", error);
@@ -194,7 +189,7 @@ const Documents = () => {
       key: "actions",
       render: (record) => (
         <Space size="middle">
-          <Button danger onClick={() => handleDelete(record.id)}>
+          <Button danger onClick={() => showDeleteModal(record.id)}>
             Delete
           </Button>
         </Space>
@@ -231,7 +226,7 @@ const Documents = () => {
         Add Document
       </Button>
 
-      {/* Queried Documents Table */}
+      {/* Documents Table with Loading Spinner */}
       <Typography.Title level={5}>Queried Documents</Typography.Title>
       {documents.length > 0 ? (
         <Table
@@ -242,9 +237,10 @@ const Documents = () => {
           pagination={{ pageSize: 5 }}
         />
       ) : (
-        <Typography.Text type="secondary">
-          No queried documents available.
-        </Typography.Text>
+        // <Typography.Text type="secondary">
+        //   No queried documents available.
+        // </Typography.Text>
+        <Spin size="large"/>
       )}
 
       {/* Upload Modal */}
@@ -284,7 +280,7 @@ const Documents = () => {
           style={{ width: "100%", marginBottom: "10px" }}
         >
           <Select.Option value="en">English</Select.Option>
-          <Select.Option value="ar">Arabic</Select.Option>\
+          <Select.Option value="ar">Arabic</Select.Option>
         </Select>
 
         <Upload
@@ -295,6 +291,22 @@ const Documents = () => {
           <Button icon={<UploadOutlined />}>Select File</Button>
         </Upload>
         {file && <Typography.Text>Selected File: {file.name}</Typography.Text>}
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        title="Confirm Delete"
+        open={deleteModalVisible}
+        onOk={handleDelete}
+        onCancel={() => setDeleteModalVisible(false)}
+        okText="Yes, Delete"
+        okType="danger"
+        cancelText="Cancel"
+      >
+        <p>
+          <ExclamationCircleOutlined /> Are you sure you want to delete this
+          document?
+        </p>
       </Modal>
     </div>
   );
