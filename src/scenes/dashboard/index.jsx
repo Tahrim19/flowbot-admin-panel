@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Row, Col, Card, Typography, message } from "antd";
+import { Row, Col, Card, Typography, message, Spin } from "antd";
 import AreaChart from "../../components/AreaChart";
 import LineChart from "../../components/LineChart";
 import PieChart from "../../components/PieChart";
@@ -149,13 +149,17 @@ const Dashboard = () => {
             }}
           >
             <div style={{ marginTop: "-50px" }}>
-              <AreaChart
-                data={totalChatsDaily}
-                legendX="Day"
-                legendY="Count"
-                minX="100"
-                maxY="0"
-              />
+              {loading ? (
+                <Spin size="large" />
+              ) : (
+                <AreaChart
+                  data={totalChatsDaily}
+                  legendX="Day"
+                  legendY="Count"
+                  minX="100"
+                  maxY="0"
+                />
+              )}
             </div>
           </Card>
         </Col>
@@ -251,7 +255,11 @@ const Dashboard = () => {
             }}
           >
             <div style={{ marginTop: "-28px" }}>
-              <PieChart data={sentimentData} />
+              {loading ? (
+                <Spin size="large" />
+              ) : (
+                <PieChart data={sentimentData} />
+              )}
             </div>
           </Card>
         </Col>
@@ -266,13 +274,17 @@ const Dashboard = () => {
               backgroundColor: token.colorBgContainer,
             }}
           >
-            <LineChart
-              data={messageTrends}
-              legendX="Days"
-              legendY="Count"
-              minX="1"
-              minY="100"
-            />
+            {loading ? (
+              <Spin size="large" />
+            ) : (
+              <LineChart
+                data={messageTrends}
+                legendX="Days"
+                legendY="Count"
+                minX="1"
+                minY="100"
+              />
+            )}
           </Card>
         </Col>
       </Row>
