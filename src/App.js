@@ -10,7 +10,7 @@ import Documents from "./scenes/documents";
 import Analytics from "./scenes/analytics";
 import SentimentAnalysis from "./scenes/sentimentAnalysis";
 import PlatformInsights from "./scenes/platformInsights";
-import Settings from "./scenes/settings";
+import Settings from "./scenes/configurations";
 // import Alerts from "./scenes/alerts";
 import Reports from "./scenes/reports";
 import HelpSupport from "./scenes/help";
