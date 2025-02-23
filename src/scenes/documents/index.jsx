@@ -123,7 +123,7 @@ const Documents = () => {
         },
       });
 
-      if (!saveResponse.data.success) {
+      if (!saveResponse.data.status || saveResponse.data.status.toLowerCase() === 'error') {
         throw new Error("Failed to save document details.");
       }
 
