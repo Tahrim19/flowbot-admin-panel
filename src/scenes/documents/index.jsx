@@ -204,6 +204,7 @@ const Documents = () => {
         backgroundColor: token.colorBgBase,
         color: token.colorTextBase,
         marginLeft: "210px",
+        overflowX: "hidden",
       }}
     >
       <Typography.Title

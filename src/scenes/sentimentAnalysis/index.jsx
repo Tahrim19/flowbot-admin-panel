@@ -135,7 +135,7 @@ const SentimentAnalysis = () => {
                     data={sentimentTrends}
                     legendX="Day"
                     legendY="Count"
-                    minX="100"
+                    minX="1"
                     maxY="0"
                   />
                 )}
