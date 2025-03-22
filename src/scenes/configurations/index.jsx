@@ -47,7 +47,7 @@ const Settings = () => {
           }),
     };
 
-    console.log("Sending Config Data:", configData); // Debugging
+    // console.log("Sending Config Data:", configData); // Debugging
 
     try {
       const response = await axios.post(requests.configurations, configData, {
@@ -58,7 +58,7 @@ const Settings = () => {
         },
       });
 
-      console.log("Response:", response.data);
+      // console.log("Response:", response.data);
 
       notification.success({
         message: "Settings Saved",
@@ -103,6 +103,7 @@ const Settings = () => {
           wabaId,
           initMsg,
           botName,
+          accessToken: authToken,
         }}
       >
         <Form.Item
@@ -121,7 +122,7 @@ const Settings = () => {
 
         <Form.Item
           label="Bot Name"
-          name="bot_name"
+          name="name"
           rules={[{ required: true, message: "Please enter the bot name!" }]}
         >
           <Input
