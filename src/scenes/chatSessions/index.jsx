@@ -1,9 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Input, Typography, Select, Table, message, Spin } from "antd";
+import {
+  Input,
+  Typography,
+  Select,
+  Table,
+  message,
+  Spin,
+  Modal,
+  List,
+  Card,
+} from "antd";
 import axios from "axios";
 import { useTheme } from "../../theme";
 import requests from "../../Requests";
-import dayjs from "dayjs"; 
+import dayjs from "dayjs";
+import { UserOutlined, RobotOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 
@@ -13,6 +24,11 @@ const ChatSessions = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterByLastActive, setFilterByLastActive] = useState("all");
   const [loading, setLoading] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [selectedSessionId, setSelectedSessionId] = useState(null);
+  const [messageLoading, setMessageLoading] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
   const { theme } = useTheme();
   const { token } = theme;
 
@@ -39,7 +55,7 @@ const ChatSessions = () => {
         const rows = response.data?.rows || [];
 
         setSessions(rows);
-        setFilteredSessions(rows); // Initialize filtered sessions
+        setFilteredSessions(rows);
       } catch (error) {
         message.error("Failed to fetch chat sessions");
         console.error("Error fetching chat sessions:", error);
@@ -66,7 +82,7 @@ const ChatSessions = () => {
 
   // Apply search & filter logic
   const applyFilters = (search, lastActiveFilter) => {
-    const now = dayjs(); // Get current time
+    const now = dayjs();
 
     const filtered = sessions.filter((session) => {
       const userId = session.id?.toString().toLowerCase() || "";
@@ -95,7 +111,29 @@ const ChatSessions = () => {
     setFilteredSessions(filtered);
   };
 
-  // Table Columns
+  const fetchMessages = async (conversationId) => {
+    setMessageLoading(true);
+    try {
+      const authToken = localStorage.getItem("token");
+      const bId = localStorage.getItem("businessId");
+
+      const response = await axios.get(
+        `${requests.messages}?conversation_id=${conversationId}&orderBy=created_at asc`,
+        {
+          headers: { "x-access-token": authToken, "x-business-id": bId },
+        }
+      );
+
+      setMessages(response.data?.data?.rows || []);
+      setSelectedSessionId(conversationId);
+      setIsModalVisible(true);
+    } catch (error) {
+      message.error("Failed to fetch messages");
+    } finally {
+      setMessageLoading(false);
+    }
+  };
+
   const columns = [
     { title: "User ID", dataIndex: "id", key: "id" },
     { title: "Channel", dataIndex: "channel", key: "channel" },
@@ -113,25 +151,11 @@ const ChatSessions = () => {
         marginLeft: "210px",
       }}
     >
-      <Typography.Title
-        level={2}
-        style={{
-          marginBottom: "1.5rem",
-          color: token.colorTextBase,
-          letterSpacing: "2px",
-        }}
-      >
+      <Typography.Title level={2} style={{ marginBottom: "1.5rem" }}>
         Chat Sessions
       </Typography.Title>
 
-      {/* Search and Filter Section */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: "20px",
-        }}
-      >
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
         <Input
           placeholder="Search by User ID or Channel"
           value={searchTerm}
@@ -159,9 +183,81 @@ const ChatSessions = () => {
           rowKey="id"
           pagination={{ pageSize: 5 }}
           bordered
-          scroll={{ x: "max-content" }}
+          onRow={(record) => ({
+            onClick: () => fetchMessages(record.id),
+            style: { cursor: "pointer" },
+          })}
         />
       )}
+
+      {/* Messages Modal */}
+      <Modal
+        open={isModalVisible}
+        title="Conversation"
+        onCancel={() => setIsModalVisible(false)}
+        footer={null}
+        width='90%'
+        style={{ maxHeight: "100vh", paddiingBottom:20 }}
+      >
+        {messageLoading ? (
+          <Spin size="large" />
+        ) : (
+          <List
+            dataSource={messages}
+            renderItem={(msg) => {
+              const isUser = msg.sender?.toLowerCase() === "user";
+              let messageText = msg.content;
+              try {
+                const parsed = JSON.parse(msg.content);
+                messageText = parsed?.text || msg.content;
+              } catch {
+                // keep original
+              }
+
+              return (
+                <List.Item
+                  style={{
+                    display: "flex",
+                    justifyContent: isUser ? "flex-end" : "flex-start",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 8,
+                      alignItems: "flex-end",
+                      flexDirection: isUser ? "row-reverse" : "row",
+                    }}
+                  >
+                    {isUser ? (
+                      <UserOutlined style={{ fontSize: 20, color: token.colorPrimary }} />
+                    ) : (
+                      <RobotOutlined style={{ fontSize: 20, color: "#555" }} />
+                    )}
+
+                    <Card
+                      style={{
+                        maxWidth: "100vh",
+                        borderRadius: "20px",
+                        backgroundColor: isUser ? token.colorPrimary : "#f5f5f5",
+                        color: isUser ? "#fff" : token.colorTextBase,
+                        boxShadow: "0 2px 6px rgba(0, 0, 0, 0.05)",
+                      }}
+                    >
+                      <p style={{ margin: 0 }}>{messageText}</p>
+                      <div style={{ textAlign: "right", marginTop: 0 }}>
+                        <small style={{ fontSize: "0.75rem", opacity: 0.7 }}>
+                          {dayjs(msg.created_at).format("HH:mm A")}
+                        </small>
+                      </div>
+                    </Card>
+                  </div>
+                </List.Item>
+              );
+            }}
+          />
+        )}
+      </Modal>
     </div>
   );
 };

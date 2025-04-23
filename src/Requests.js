@@ -6,6 +6,7 @@ const requests = {
     uploadDocument : `${baseUrl}/uploads`,
     chatSessions: `${baseUrl}/conversations`,
     configurations: `${baseUrl}/configurations`,
+    messages: `${baseUrl}/messages`,
 
     // ANALYTICS
     chatUsage:`${baseUrl}/charts/chat-by-platform`,
