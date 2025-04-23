@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Button, Input, Typography, Card, Form, Checkbox } from "antd";
+import { Button, Input, Typography, Card, Form, Checkbox, Spin } from "antd";
 import { useNavigate } from "react-router-dom";
 import requests from "../../Requests";
 import axios from "axios";
 
-
 const LoginPage = ({ setIsAuthenticated }) => {
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false); // State to control loader
   const navigate = useNavigate();
 
   // Check if user is already authenticated (token exists)
@@ -21,6 +21,7 @@ const LoginPage = ({ setIsAuthenticated }) => {
   const handleLogin = async (values) => {
     const { username, password } = values;
 
+    setLoading(true); // Show loader
     try {
       // Make POST request with proper Content-Type and body format
       const response = await axios.post(
@@ -31,22 +32,18 @@ const LoginPage = ({ setIsAuthenticated }) => {
         },
         {
           headers: {
-            // "Content-Type": "url-form-encoded", // Correct header for JSON body
             "Content-Type": "application/x-www-form-urlencoded",
           },
         }
       );
 
       if (response.status === 200) {
-        navigate("/"); // Redirect to home page
-        // console.log("Login successful", response.data);
-        // console.log(response.data.data.token);
-
         // Save the token in localStorage
         localStorage.setItem("token", response.data.data.token);
         localStorage.setItem("businessId", response.data.data.business_id);
 
         setIsAuthenticated(true);
+        navigate("/"); // Redirect to home page
       }
     } catch (error) {
       if (error.response) {
@@ -56,6 +53,8 @@ const LoginPage = ({ setIsAuthenticated }) => {
         // Handle other errors (e.g., network issues)
         setError("An error occurred. Please try again.");
       }
+    } finally {
+      setLoading(false); // Hide loader
     }
   };
 
@@ -65,6 +64,7 @@ const LoginPage = ({ setIsAuthenticated }) => {
       const payload = JSON.parse(atob(token.split(".")[1])); // Decode JWT payload
       return payload.exp * 1000 < Date.now(); // Check expiration
     } catch (e) {
+      console.log("Error decoding token:", e);
       return true; // If decoding fails, treat as expired
     }
   };
@@ -83,8 +83,29 @@ const LoginPage = ({ setIsAuthenticated }) => {
         height: "100vh",
         backgroundColor: "#f0f2f5",
         padding: "20px",
+        position: "relative", // For overlay
       }}
     >
+      {/* Overlay to disable the screen */}
+      {loading && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(255, 255, 255, 0.7)",
+            zIndex: 10,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Spin size="large" />
+        </div>
+      )}
+
       <Card
         style={{
           width: "400px",
@@ -151,7 +172,12 @@ const LoginPage = ({ setIsAuthenticated }) => {
 
           {/* Login Button */}
           <Form.Item>
-            <Button type="primary" htmlType="submit" style={{ width: "100%" }}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              style={{ width: "100%" }}
+              loading={loading} // Show loader on button
+            >
               Login
             </Button>
           </Form.Item>

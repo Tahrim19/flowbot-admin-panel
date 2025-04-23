@@ -83,15 +83,15 @@ const Sidebar = () => {
       to: "/settings",
     },
     // { key: "9", icon: <NotificationOutlined />, label: "Alerts", to: "/alerts" },
-    { key: "9", icon: <FileDoneOutlined />, label: "Reports", to: "/reports" },
+    // { key: "10", icon: <FileDoneOutlined />, label: "Reports", to: "/reports" },
+    // {
+    //   key: "11",
+    //   icon: <QuestionCircleOutlined />,
+    //   label: "Help & Support",
+    //   to: "/help",
+    // },
     {
-      key: "10",
-      icon: <QuestionCircleOutlined />,
-      label: "Help & Support",
-      to: "/help",
-    },
-    {
-      key: "11",
+      key: "12",
       icon: <LogoutOutlined />,
       label: "Logout",
       to: "/logout"

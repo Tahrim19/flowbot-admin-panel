@@ -12,8 +12,8 @@ import SentimentAnalysis from "./scenes/sentimentAnalysis";
 import PlatformInsights from "./scenes/platformInsights";
 import Settings from "./scenes/configurations";
 // import Alerts from "./scenes/alerts";
-import Reports from "./scenes/reports";
-import HelpSupport from "./scenes/help";
+// import Reports from "./scenes/reports";
+// import HelpSupport from "./scenes/help";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import Login from "./scenes/login";
 import Logout from "./scenes/logout";
@@ -40,8 +40,8 @@ export default function App() {
               <Route path="/platformInsights" element={<PlatformInsights />} />
               <Route path="/settings" element={<Settings />} />
               {/* <Route path="/alerts" element={<Alerts />} /> */}
-              <Route path="/reports" element={<Reports />} />
-              <Route path="/help" element={<HelpSupport />} />
+              {/* <Route path="/reports" element={<Reports />} /> */}
+              {/* <Route path="/help" element={<HelpSupport />} /> */}
               <Route path="/logout" element={<Logout setIsAuthenticated={setIsAuthenticated} />} />
             </Routes>
           </main>

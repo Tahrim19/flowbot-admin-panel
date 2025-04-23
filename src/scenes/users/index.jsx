@@ -60,18 +60,18 @@ const Users = () => {
   ];
 
   // Export Data as CSV
-  const handleExportCSV = () => {
-    const headers = ["User ID", "Name", "Email"];
-    const rows = users.map((user) => [user.id, user.name, user.email]);
+  // const handleExportCSV = () => {
+  //   const headers = ["User ID", "Name", "Email"];
+  //   const rows = users.map((user) => [user.id, user.name, user.email]);
 
-    const csvContent = [
-      headers.join(","), // Join headers with commas
-      ...rows.map((row) => row.join(",")), // Join rows with commas
-    ].join("\n"); // Join rows with newline characters
+  //   const csvContent = [
+  //     headers.join(","), // Join headers with commas
+  //     ...rows.map((row) => row.join(",")), // Join rows with commas
+  //   ].join("\n"); // Join rows with newline characters
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    saveAs(blob, "users_data.csv");
-  };
+  //   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  //   saveAs(blob, "users_data.csv");
+  // };
 
   return (
     <div
@@ -94,7 +94,7 @@ const Users = () => {
       </Typography.Title>
 
       {/* Export as CSV button */}
-      <Button
+      {/* <Button
         type="primary"
         onClick={handleExportCSV}
         style={{
@@ -102,7 +102,7 @@ const Users = () => {
         }}
       >
         Export Data as CSV
-      </Button>
+      </Button> */}
 
       {/* Users Table */}
       <div style={{ marginBottom: "40px", width: "100%" }}>
